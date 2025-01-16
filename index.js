@@ -89,6 +89,7 @@ app.get('/info', (request, response) => {
   response.send(line1 + '<br>' + line2)
 })
 
-const PORT = 3001
-app.listen(PORT)
-console.log(`Server running of port ${PORT}`)
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running of port ${PORT}`)
+})
