@@ -44,6 +44,16 @@ app.use((req, res, next) => {
   }
 })
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+
 let persons = [
   {
     id: "1",
@@ -70,13 +80,14 @@ let persons = [
 /*app.get('/api/persons', (request, response) => {
   response.json(persons)
 })*/
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
   Contact.find({}).then(contacts => {
     response.json(contacts)
   })
+  .catch(error => next(error))
 })
 
-app.get('/api/persons/:id', (request, response) => {
+/*app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id
   const person = persons.find(p => p.id === id)
 
@@ -85,6 +96,17 @@ app.get('/api/persons/:id', (request, response) => {
   } else {
     response.status(404).end()
   }
+})*/
+app.get('/api/persons/:id', (request, response, next) => {
+  Contact.findById(request.params.id)
+    .then(contact => {
+      if (contact) {
+        response.json(contact)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 /*app.post('/api/persons', (request, response) => {
@@ -106,7 +128,7 @@ app.get('/api/persons/:id', (request, response) => {
   persons = persons.concat(person)
   response.json(person)
 })*/
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (!body.name || !body.number) {
@@ -121,12 +143,24 @@ app.post('/api/persons', (request, response) => {
   contact.save().then(savedContact => {
     response.json(savedContact)
   })
+  .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+/*app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
   persons = persons.filter(p => p.id !== id)
   response.status(204).end()
+})*/
+app.delete('/api/persons/:id', (request, response, next) => {
+  Contact.findByIdAndDelete(request.params.id)
+  .then(result => {
+    if (result) {
+      response.status(204).end()
+    } else {
+      response.status(404).end()
+    }
+  })
+  .catch(error => next(error))
 })
 
 app.get('/info', (request, response) => {
@@ -134,6 +168,8 @@ app.get('/info', (request, response) => {
   const line2 = new Date().toString()
   response.send(line1 + '<br>' + line2)
 })
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
