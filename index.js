@@ -1,12 +1,36 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+//const mongoose = require('mongoose')
+const Contact = require('./models/contact')
 
 const app = express()
 
 app.use(express.json())
 app.use(cors())
 app.use(express.static('dist'))
+
+/*const url =
+  `mongodb+srv://fullstack:${password}@cluster0.br4pb.mongodb.net/contactApp?retryWrites=true&w=majority&appName=Cluster0`
+
+mongoose.set('strictQuery', false)
+mongoose.connect(url)
+
+const contactSchema = new mongoose.Schema({
+  name: String,
+  number: String
+})
+
+contactSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject._v
+  }
+})
+
+const Contact = mongoose.model('Contact', contactSchema)*/
 
 // Create new token
 morgan.token('body', (req) => req.method === 'POST' ? JSON.stringify(req.body) : '')
@@ -43,8 +67,13 @@ let persons = [
   }
 ]
 
-app.get('/api/persons', (request, response) => {
+/*app.get('/api/persons', (request, response) => {
   response.json(persons)
+})*/
+app.get('/api/persons', (request, response) => {
+  Contact.find({}).then(contacts => {
+    response.json(contacts)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
@@ -58,7 +87,7 @@ app.get('/api/persons/:id', (request, response) => {
   }
 })
 
-app.post('/api/persons', (request, response) => {
+/*app.post('/api/persons', (request, response) => {
 
   // Check the validity of the input
   if (!request.body.name || request.body.name.length === 0) {
@@ -76,6 +105,22 @@ app.post('/api/persons', (request, response) => {
   const person = {id: id, name: request.body.name, number: request.body.number}
   persons = persons.concat(person)
   response.json(person)
+})*/
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+
+  if (body.content === undefined) {
+    return response.status(400).json({error: 'content missing'})
+  }
+
+  const contact = new Contact({
+    name: body.name,
+    number: body.number
+  })
+
+  contact.save().then(savedContact => {
+    response.json(savedContact)
+  })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -90,7 +135,7 @@ app.get('/info', (request, response) => {
   response.send(line1 + '<br>' + line2)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running of port ${PORT}`)
 })
