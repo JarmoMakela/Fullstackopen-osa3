@@ -56,10 +56,6 @@ app.get('/api/persons/:id', (request, response, next) => {
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
-  if (!body.name || !body.number) {
-    return response.status(400).json({error: 'content missing'})
-  }
-
   const contact = new Contact({
     name: body.name,
     number: body.number
@@ -74,19 +70,10 @@ app.post('/api/persons', (request, response, next) => {
 
 app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
-  /*const body = request.body
-  const contact = {
-    name: body.name,
-    number: body.number
-  }*/
-
-  if (!number) {
-    return response.status(400).json({error: 'content missing'})
-  }
 
   Contact.findByIdAndUpdate(
     request.params.id,
-    [{ name, number }], 
+    { name, number }, 
     { new: true, runValidators: true, context: 'query' }
   )
     .then(updatedContact => {
