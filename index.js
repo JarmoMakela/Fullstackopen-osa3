@@ -38,7 +38,7 @@ app.get('/api/persons', (request, response, next) => {
   Contact.find({}).then(contacts => {
     response.json(contacts)
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -62,10 +62,10 @@ app.post('/api/persons', (request, response, next) => {
   })
 
   contact.save()
-  .then(savedContact => {
-    response.json(savedContact)
-  })
-  .catch(error => next(error))
+    .then(savedContact => {
+      response.json(savedContact)
+    })
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -73,7 +73,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 
   Contact.findByIdAndUpdate(
     request.params.id,
-    { name, number }, 
+    { name, number },
     { new: true, runValidators: true, context: 'query' }
   )
     .then(updatedContact => {
@@ -84,24 +84,24 @@ app.put('/api/persons/:id', (request, response, next) => {
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Contact.findByIdAndDelete(request.params.id)
-  .then(result => {
-    if (result) {
-      response.status(204).end()
-    } else {
-      response.status(404).end()
-    }
-  })
-  .catch(error => next(error))
+    .then(result => {
+      if (result) {
+        response.status(204).end()
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.get('/info', (request, response, next) => {
   Contact.countDocuments()
-  .then(result => {
-    const line1 = `<div>Phonebook has info for ${result} people</div>`
-    const line2 = new Date().toString()
-    response.send(line1 + '<br>' + line2)
-  })
-  .catch(error => next(error))
+    .then(result => {
+      const line1 = `<div>Phonebook has info for ${result} people</div>`
+      const line2 = new Date().toString()
+      response.send(line1 + '<br>' + line2)
+    })
+    .catch(error => next(error))
 })
 
 app.use(errorHandler)

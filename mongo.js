@@ -28,13 +28,13 @@ const ContactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model('Contact', ContactSchema)
 
-// Create 
+// Create
 const contact = new Contact({
   name: name,
   number: number
 })
 
-contact.save().then(result => {
+contact.save().then( () => {
   console.log(`added ${name} ${number} to phonebook`)
   mongoose.connection.close()
 })
